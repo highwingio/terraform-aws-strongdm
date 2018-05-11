@@ -10,7 +10,8 @@ resource "aws_security_group" "sdm" {
 }
 
 module "sdm_relay" {
-  source                                 = "github.com/FitnessKeeper/tf_aws_ecs_service?ref=v2.4.1"
+  #source                                 = "github.com/FitnessKeeper/tf_aws_ecs_service?ref=v2.4.1"
+  source                                 = "../tf_aws_ecs_service"
   region                                 = "${var.region}" #"${data.aws_region.current.name}"
   vpc_id                                 = "${var.vpc_id}"
   ecs_cluster_arn                        = "${var.ecs_cluster_arn}"
@@ -33,8 +34,12 @@ module "sdm_relay" {
   docker_environment = [
     {
       "name"  = "SERVICE_NAME"
-      "value" = "strongdm_relay"
+      "value" = "strongdm-relay"
     },
+    {
+      "name"  = "SDM_ADMIN_TOKEN"
+      "value" = "${var.sdm_admin_token}"
+    }
   ]
 
 #  docker_mount_points = [

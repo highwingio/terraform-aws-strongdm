@@ -14,6 +14,10 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "sdm_admin_token" {
+  description = "SDM_ADMIN_TOKEN: admin tokens to provide tokenized account access for fully automated strongDM use."
+}
+
 variable "vpc_id" {
   type        = "string"
   description = "ID of VPC in which ECS cluster is located"
