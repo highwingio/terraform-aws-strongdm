@@ -36,15 +36,6 @@ jobs:
               DOCKER_BUILD_TAG="build-${CIRCLE_BUILD_NUM}"
               should_push_commit=yes
               fi
-              echo "checking dockerhub for ${commit}-rc"
-              export DOCKER_REPO=asicsdigital/strongdm
-              export DOCKER_TAG=${commit}-rc
-              found=$(check-dockerhub.sh)
-              if [[ ! "$found" ]]; then
-                echo "Did not find ${commit}-rc, you must test this first on"
-                echo " staging before deploying to production."
-                exit 1
-              fi
             fi
             # display tags
             echo "tag is: " $DOCKER_TAG
