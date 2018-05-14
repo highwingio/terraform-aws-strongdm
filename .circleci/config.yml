@@ -1,6 +1,85 @@
 version: 2
-
 jobs:
+  deploy-to-dockerhub:
+    docker:
+      - image: fitnesskeeper/docker-ci-builder
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build and push Docker image
+          command: |
+            # check if this image exists already on dockerhub
+            echo "checking recent commits"
+            get-latest-nonmerge-commit.sh --debug
+            commit=$(get-latest-nonmerge-commit.sh)
+            if [[ "$commit" ]]; then
+              echo "most recent non-merge commit: $commit"
+              echo "checking dockerhub for it"
+              export DOCKER_REPO=asicsdigital/strongdm
+              export DOCKER_TAG=$commit
+              found=$(check-dockerhub.sh)
+              if [[ "$found" ]]; then
+                echo "found image already on dockerhub"
+                should_build=no
+              else
+                echo "didn't find this image tag on dockerhub"
+                should_build=yes
+              fi
+            else
+              echo "no non-merge commit found, exiting"
+              exit 1
+            fi
+            # setup proper tags and BUILD_ENV
+            if [[ "$CIRCLE_BRANCH" = "master"  ]]; then
+              DOCKER_TAG=latest
+              DOCKER_BUILD_TAG="build-${CIRCLE_BUILD_NUM}"
+              should_push_commit=yes
+              fi
+              echo "checking dockerhub for ${commit}-rc"
+              export DOCKER_REPO=asicsdigital/strongdm
+              export DOCKER_TAG=${commit}-rc
+              found=$(check-dockerhub.sh)
+              if [[ ! "$found" ]]; then
+                echo "Did not find ${commit}-rc, you must test this first on"
+                echo " staging before deploying to production."
+                exit 1
+              fi
+            fi
+            # display tags
+            echo "tag is: " $DOCKER_TAG
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+            if [[ "$should_build" = "yes" ]] ; then
+              echo "building container"
+              if [[ "$should_push_commit" = "yes" ]] ; then
+                echo "setting up for webpack to upload to S3"
+                export GIT_COMMIT_SHA=$commit
+              fi
+              time docker build --build-arg=WEBPACK_UPLOAD_S3=$WEBPACK_UPLOAD_S3 \
+                --build-arg=GIT_COMMIT_SHA=$GIT_COMMIT_SHA \
+                -t asicsdigital/strongdm:$DOCKER_TAG .
+              # run tests
+              export DOCKER_TAG
+              # if we made it here then tests passed, so now push.
+              if [[ "$should_push_commit" = "yes" ]] ; then
+                # tag and push this commit hash
+                echo "pushing this commit tag $commit"
+                docker tag asicsdigital/strongdm:$DOCKER_TAG asicsdigital/strongdm:$commit
+                time docker push asicsdigital/strongdm:$commit
+              fi
+            else
+              echo "pulling and re-tagging container"
+              time docker pull asicsdigital/strongdm:$commit
+              docker tag asicsdigital/strongdm:$commit asicsdigital/strongdm:$DOCKER_TAG
+            fi
+            time docker push asicsdigital/strongdm:$DOCKER_TAG
+            # check if we should push to additional tag
+            if [[ "$DOCKER_BUILD_TAG" ]]; then
+              echo "also pushing to tag: " $DOCKER_BUILD_TAG
+              docker tag asicsdigital/strongdm:$DOCKER_TAG asicsdigital/strongdm:$DOCKER_BUILD_TAG
+              docker push asicsdigital/strongdm:$DOCKER_BUILD_TAG
+            fi
+
   build:
     docker:
       - image: hashicorp/terraform:0.11.7
@@ -26,4 +105,9 @@ workflows:
   version: 2
   build:
     jobs:
+      - deploy-to-dockerhub:
+          filters:
+            branches:
+              only:
+                - master
       - build
