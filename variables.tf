@@ -60,7 +60,6 @@ variable "docker_memory_reservation" {
   default     = 128
 }
 
-
 variable "docker_mount_points" {
   type        = "list"
   description = "List of mount point maps of format { \"sourceVolume\" = \"vol_name\", \"containerPath\" = \"path\", [\"readOnly\" = \"true or false\" ] }"
@@ -104,7 +103,6 @@ variable "extra_task_policy_arns" {
   description = "List of ARNs of IAM policies to be attached to the ECS task role (in addition to the default policy, so cannot be more than 9 ARNs)"
   default     = []
 }
-
 
 variable "ecs_placement_strategy_type" {
   description = "Placement strategy to use when distributing tasks (default binpack)"
