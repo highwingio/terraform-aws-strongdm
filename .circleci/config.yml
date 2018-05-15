@@ -42,10 +42,9 @@ jobs:
             if [[ "$should_build" = "yes" ]] ; then
               echo "building container"
               if [[ "$should_push_commit" = "yes" ]] ; then
-                echo "setting up for webpack to upload to S3"
                 export GIT_COMMIT_SHA=$commit
               fi
-              time docker build --build-arg=WEBPACK_UPLOAD_S3=$WEBPACK_UPLOAD_S3 \
+              time docker build \
                 --build-arg=GIT_COMMIT_SHA=$GIT_COMMIT_SHA \
                 -t asicsdigital/strongdm:$DOCKER_TAG .
               # run tests
