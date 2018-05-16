@@ -7,8 +7,6 @@ data "aws_vpc" "vpc" {
 }
 
 locals {
-  identifier = "${var.identifier}"
-
   docker_environment = [
     {
       "name"  = "SERVICE_NAME"
