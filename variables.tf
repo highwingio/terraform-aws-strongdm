@@ -118,3 +118,18 @@ variable "ecs_log_retention" {
   description = "Number of days of ECS task logs to retain (default 3)"
   default     = 3
 }
+
+variable "enable_sdm_gateway" {
+  description = "Should the sdm relay also be a gateway? default false"
+  default     = false
+}
+
+variable "sdm_gateway_listen_app_port" {
+  description = "Port for SDM gateway to listen on inside container"
+  default     = 5000
+}
+
+variable "curl_metadata_timeout" {
+  description = "Time in seconds to time out the curl for EC2 metadata"
+  default     = 30
+}
