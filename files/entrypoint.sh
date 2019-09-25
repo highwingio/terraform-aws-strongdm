@@ -19,10 +19,8 @@ if [[ "${ENABLE_SDM_GATEWAY}" == "true" ]] ; then \
   PUBLIC_IP=$(eval "$CURL_METADATA_COMMAND")
   echo "found public IP $PUBLIC_IP"
   CREATE_GATEWAY_TOKEN_COMMAND="$CMD relay create-gateway ${PUBLIC_IP}:${SDM_GATEWAY_LISTEN_APP_PORT} 0.0.0.0:${SDM_GATEWAY_LISTEN_APP_PORT}"
-  echo "would have run: $CREATE_GATEWAY_TOKEN_COMMAND"
-  #export SDM_RELAY_TOKEN=$(eval "$CREATE_GATEWAY_TOKEN_COMMAND")
-  echo "sleeping 60000 because that was commented out"
-  sleep 60000
+  echo "running: $CREATE_GATEWAY_TOKEN_COMMAND"
+  export SDM_RELAY_TOKEN=$(eval "$CREATE_GATEWAY_TOKEN_COMMAND")
 fi
 
 # temporary auth state is created by invoking `relay create` and must
