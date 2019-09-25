@@ -21,6 +21,13 @@
                "awslogs-region": "${awslogs_region}",
                "awslogs-stream-prefix": "${awslogs_stream_prefix}"
             }
-        }
+        },
+        "portMappings": [
+            {
+                "containerPort": ${app_port},
+                "hostPort": 0,
+                "protocol": "tcp"
+            }
+        ]
     }
 ]

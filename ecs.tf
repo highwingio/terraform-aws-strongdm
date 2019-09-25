@@ -20,6 +20,7 @@ data "template_file" "container_definition" {
     awslogs_group         = "${var.service_identifier}-${var.task_identifier}"
     awslogs_region        = "${data.aws_region.region.name}"
     awslogs_stream_prefix = "${var.service_identifier}"
+    app_port              = "${var.sdm_gateway_listen_app_port}"
   }
 }
 
