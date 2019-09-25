@@ -18,7 +18,7 @@ if [[ "${ENABLE_SDM_GATEWAY}" == "true" ]] ; then \
   echo $CURL_METADATA_COMMAND
   PUBLIC_IP=$(eval "$CURL_METADATA_COMMAND")
   echo "found public IP $PUBLIC_IP"
-  CREATE_GATEWAY_TOKEN_COMMAND="$CMD relay create-gateway 0.0.0.0:${SDM_GATEWAY_LISTEN_APP_PORT} ${PUBLIC_IP}:${SDM_GATEWAY_LISTEN_APP_PORT}"
+  CREATE_GATEWAY_TOKEN_COMMAND="$CMD relay create-gateway ${PUBLIC_IP}:${SDM_GATEWAY_LISTEN_APP_PORT} 0.0.0.0:${SDM_GATEWAY_LISTEN_APP_PORT}"
   echo "would have run: $CREATE_GATEWAY_TOKEN_COMMAND"
   #export SDM_RELAY_TOKEN=$(eval "$CREATE_GATEWAY_TOKEN_COMMAND")
   echo "sleeping 60000 because that was commented out"
