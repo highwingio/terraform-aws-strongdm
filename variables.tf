@@ -133,3 +133,8 @@ variable "curl_metadata_timeout" {
   description = "Time in seconds to time out the curl for EC2 metadata"
   default     = 30
 }
+
+variable "ecs_cluster_extra_access_sg_id" {
+  description = "ECS extra access Security Group ID to attach a security_group_rule to for strongdm gateway inbound traffic. Note cannot contain inline rule blocks."
+  default     = ""
+}
