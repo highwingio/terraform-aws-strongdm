@@ -20,6 +20,7 @@ data "template_file" "container_definition" {
     awslogs_group         = "${var.service_identifier}-${var.task_identifier}"
     awslogs_region        = "${data.aws_region.region.name}"
     awslogs_stream_prefix = "${var.service_identifier}"
+    app_port              = "${var.sdm_gateway_listen_app_port}"
   }
 }
 
@@ -62,4 +63,14 @@ resource "aws_ecs_service" "service" {
 resource "aws_cloudwatch_log_group" "task" {
   name              = "${var.service_identifier}-${var.task_identifier}"
   retention_in_days = "${var.ecs_log_retention}"
+}
+
+resource "aws_security_group_rule" "gateway_inbound_traffic" {
+  count             = "${var.enable_sdm_gateway == "true" ? 1 : 0}"
+  from_port         = "${var.sdm_gateway_listen_app_port}"
+  protocol          = "tcp"
+  security_group_id = "${var.ecs_cluster_extra_access_sg_id}"
+  to_port           = "${var.sdm_gateway_listen_app_port}"
+  type              = "ingress"
+  cidr_blocks       = ["0.0.0.0/0"]
 }
