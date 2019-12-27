@@ -1,9 +1,9 @@
 data "aws_region" "region" {
-  name = "${var.region}"
+  name = var.region
 }
 
 data "aws_vpc" "vpc" {
-  id = "${var.vpc_id}"
+  id = var.vpc_id
 }
 
 locals {
@@ -14,15 +14,16 @@ locals {
     },
     {
       "name"  = "SDM_ADMIN_TOKEN"
-      "value" = "${var.sdm_admin_token}"
+      "value" = var.sdm_admin_token
     },
     {
       "name"  = "ENABLE_SDM_GATEWAY"
-      "value" = "${var.enable_sdm_gateway}"
+      "value" = var.enable_sdm_gateway
     },
     {
       "name"  = "SDM_GATEWAY_LISTEN_APP_PORT"
-      "value" = "${var.sdm_gateway_listen_app_port}"
+      "value" = var.sdm_gateway_listen_app_port
     },
   ]
 }
+
