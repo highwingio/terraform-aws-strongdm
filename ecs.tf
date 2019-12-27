@@ -1,7 +1,7 @@
 # ECS SERVICE
 
 locals {
-  docker_command_override = length(var.docker_command) > 0 ? "\"command\": [\"${var.docker_command}\"]," : ""
+  docker_command_override = "${length(var.docker_command) > 0 ? "\"command\": [\"${var.docker_command}\"]," : ""}"
 }
 
 data "template_file" "container_definition" {
@@ -72,4 +72,3 @@ resource "aws_security_group_rule" "gateway_inbound_traffic" {
   type              = "ingress"
   cidr_blocks       = ["0.0.0.0/0"]
 }
-
