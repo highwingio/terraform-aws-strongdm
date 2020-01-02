@@ -61,7 +61,7 @@ variable "docker_memory_reservation" {
 }
 
 variable "docker_mount_points" {
-  type        = list(string)
+  type        = list
   description = "List of mount point maps of format { \"sourceVolume\" = \"vol_name\", \"containerPath\" = \"path\", [\"readOnly\" = \"true or false\" ] }"
   default     = []
 }
