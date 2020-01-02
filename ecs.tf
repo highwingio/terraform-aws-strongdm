@@ -15,7 +15,7 @@ data "template_file" "container_definition" {
     memory_reservation    = var.docker_memory_reservation
     command_override      = local.docker_command_override
     environment           = jsonencode(local.docker_environment)
-    mount_points          = jsonencode(var.docker_mount_points)
+    mount_points          = var.docker_mount_points
     awslogs_region        = data.aws_region.region.name
     awslogs_group         = "${var.service_identifier}-${var.task_identifier}"
     awslogs_stream_prefix = var.service_identifier
