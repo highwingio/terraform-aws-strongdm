@@ -52,12 +52,12 @@ variable "docker_command" {
 
 variable "docker_memory" {
   description = "Hard limit on memory use for task container (default 256)"
-  default     = 256
+  default     = "256"
 }
 
 variable "docker_memory_reservation" {
   description = "Soft limit on memory use for task container (default 128)"
-  default     = 128
+  default     = "128"
 }
 
 variable "docker_mount_points" {
@@ -138,4 +138,3 @@ variable "ecs_cluster_extra_access_sg_id" {
   description = "ECS extra access Security Group ID to attach a security_group_rule to for strongdm gateway inbound traffic. Note cannot contain inline rule blocks."
   default     = ""
 }
-
