@@ -52,12 +52,12 @@ variable "docker_command" {
 
 variable "docker_memory" {
   description = "Hard limit on memory use for task container (default 256)"
-  default     = "256"
+  default     = 256
 }
 
 variable "docker_memory_reservation" {
   description = "Soft limit on memory use for task container (default 128)"
-  default     = "128"
+  default     = 128
 }
 
 variable "docker_mount_points" {
