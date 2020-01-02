@@ -25,7 +25,6 @@ variable "vpc_id" {
 }
 
 variable "ecs_desired_count" {
-  type        = string
   description = "Desired number of containers in the task (default 1)"
   default     = 2
 }
@@ -99,7 +98,7 @@ variable "log_group_name" {
 }
 
 variable "extra_task_policy_arns" {
-  type        = list(string)
+  type        = list
   description = "List of ARNs of IAM policies to be attached to the ECS task role (in addition to the default policy, so cannot be more than 9 ARNs)"
   default     = []
 }
