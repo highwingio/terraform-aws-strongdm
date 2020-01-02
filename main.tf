@@ -22,7 +22,7 @@ locals {
     },
     {
       "name"  = "SDM_GATEWAY_LISTEN_APP_PORT"
-      "value" = "${var.sdm_gateway_listen_app_port}"
+      "value" = var.sdm_gateway_listen_app_port
     },
   ]
 }

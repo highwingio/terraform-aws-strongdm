@@ -16,6 +16,7 @@ variable "region" {
 }
 
 variable "sdm_admin_token" {
+  type = string
   description = "SDM_ADMIN_TOKEN: admin tokens to provide tokenized account access for fully automated strongDM use."
 }
 
@@ -50,13 +51,15 @@ variable "docker_command" {
 }
 
 variable "docker_memory" {
+  type        = string
   description = "Hard limit on memory use for task container (default 256)"
-  default     = 256
+  default     = "256"
 }
 
 variable "docker_memory_reservation" {
+  type        = string
   description = "Soft limit on memory use for task container (default 128)"
-  default     = 128
+  default     = "128"
 }
 
 variable "docker_mount_points" {
@@ -82,6 +85,7 @@ variable "network_mode" {
 }
 
 variable "service_identifier" {
+  type        = string
   description = "Unique identifier for this pganalyze service (used in log prefix, service name etc.)"
   default     = "strongdm"
 }
@@ -119,13 +123,15 @@ variable "ecs_log_retention" {
 }
 
 variable "enable_sdm_gateway" {
+  type = string
   description = "Should the sdm relay also be a gateway? default false"
   default     = "false"
 }
 
 variable "sdm_gateway_listen_app_port" {
+  type = string
   description = "Port for SDM gateway to listen on inside container"
-  default     = 5000
+  default     = "5000"
 }
 
 variable "curl_metadata_timeout" {
