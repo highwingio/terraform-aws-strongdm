@@ -12,9 +12,15 @@ if [[ "${ENABLE_SDM_GATEWAY}" == "false" ]] ; then \
   export SDM_RELAY_TOKEN=`$CMD relay create`
 fi
 
-# If we're a gateway, get our public ip and then create a gateway token
+# If we're a gateway, get our public hostname and then create a gateway token
 if [[ "${ENABLE_SDM_GATEWAY}" == "true" ]] ; then \
-  echo "found public host $PUBLIC_HOST"
+  # If no hostname is specified, try to fetch it from instance metadata
+  if [[ "${PUBLIC_HOST}" == "" ]] ; then \
+    CURL_METADATA_COMMAND="curl --silent --max-time ${CURL_METADATA_TIMEOUT} http://169.254.169.254/latest/meta-data/public-ipv4"
+    echo $CURL_METADATA_COMMAND
+    PUBLIC_HOST=$(eval "$CURL_METADATA_COMMAND")
+  fi
+  echo "using public host $PUBLIC_HOST"
   CREATE_GATEWAY_TOKEN_COMMAND="$CMD relay create-gateway ${PUBLIC_HOST}:${SDM_GATEWAY_LISTEN_APP_PORT} 0.0.0.0:${SDM_GATEWAY_LISTEN_APP_PORT}"
   echo "running: $CREATE_GATEWAY_TOKEN_COMMAND"
   export SDM_RELAY_TOKEN=$(eval "$CREATE_GATEWAY_TOKEN_COMMAND")
