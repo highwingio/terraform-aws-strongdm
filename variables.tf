@@ -1,7 +1,7 @@
 variable "docker_image" {
   type        = string
-  description = "Docker image to use (default: asicsdigital/strongdm:latest )"
-  default     = "asicsdigital/strongdm:latest"
+  description = "Docker image to use (default: highwing/strongdm:latest )"
+  default     = "highwing/strongdm:latest"
 }
 
 variable "ecs_cluster_arn" {
@@ -16,7 +16,7 @@ variable "region" {
 }
 
 variable "sdm_admin_token" {
-  type = string
+  type        = string
   description = "SDM_ADMIN_TOKEN: admin tokens to provide tokenized account access for fully automated strongDM use."
 }
 
@@ -25,9 +25,19 @@ variable "vpc_id" {
   description = "ID of VPC in which ECS cluster is located"
 }
 
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "List of private subnet IDs in which to place the ECS tasks"
+}
+
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "List of public subnet IDs in which to place the load balancer"
+}
+
 variable "ecs_desired_count" {
   description = "Desired number of containers in the task (default 1)"
-  default     = 2
+  default     = 1
 }
 
 variable "ecs_deployment_maximum_percent" {
@@ -50,40 +60,6 @@ variable "docker_command" {
   default     = ""
 }
 
-variable "docker_memory" {
-  type        = string
-  description = "Hard limit on memory use for task container (default 256)"
-  default     = "256"
-}
-
-variable "docker_memory_reservation" {
-  type        = string
-  description = "Soft limit on memory use for task container (default 128)"
-  default     = "128"
-}
-
-variable "docker_mount_points" {
-  type        = list
-  description = "List of mount point maps of format { \"sourceVolume\" = \"vol_name\", \"containerPath\" = \"path\", [\"readOnly\" = \"true or false\" ] }"
-  default     = []
-}
-
-variable "ecs_data_volume_path" {
-  description = "Path to volume on ECS node to be defined as a \"data\" volume (default \"/opt/data\")"
-  default     = "/opt/data"
-}
-
-#variable "docker_environment" {
-#  type        = "list"
-#  description = "List of environment maps of format { \"name\" = \"var_name\", \"value\" = \"var_value\" }"
-#  default     = []
-#}
-
-variable "network_mode" {
-  description = "Docker network mode for task (default \"bridge\")"
-  default     = "bridge"
-}
-
 variable "service_identifier" {
   type        = string
   description = "Unique identifier for this pganalyze service (used in log prefix, service name etc.)"
@@ -92,7 +68,7 @@ variable "service_identifier" {
 
 variable "task_identifier" {
   description = "Unique identifier for this pganalyze task (used in log prefix, service name etc.)"
-  default     = "relay"
+  default     = "gateway"
 }
 
 variable "log_group_name" {
@@ -107,39 +83,18 @@ variable "extra_task_policy_arns" {
   default     = []
 }
 
-variable "ecs_placement_strategy_type" {
-  description = "Placement strategy to use when distributing tasks (default binpack)"
-  default     = "binpack"
-}
-
-variable "ecs_placement_strategy_field" {
-  description = "Container metadata field to use when distributing tasks (default memory)"
-  default     = "memory"
-}
-
 variable "ecs_log_retention" {
   description = "Number of days of ECS task logs to retain (default 3)"
   default     = 3
 }
 
-variable "enable_sdm_gateway" {
-  type = string
-  description = "Should the sdm relay also be a gateway? default false"
-  default     = "false"
-}
-
 variable "sdm_gateway_listen_app_port" {
-  type = string
+  type        = string
   description = "Port for SDM gateway to listen on inside container"
   default     = "5000"
 }
 
-variable "curl_metadata_timeout" {
-  description = "Time in seconds to time out the curl for EC2 metadata"
-  default     = 30
-}
-
-variable "ecs_cluster_extra_access_sg_id" {
-  description = "ECS extra access Security Group ID to attach a security_group_rule to for strongdm gateway inbound traffic. Note cannot contain inline rule blocks."
-  default     = ""
+variable "security_group_ids" {
+  type    = list(string)
+  default = []
 }

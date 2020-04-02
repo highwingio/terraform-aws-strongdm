@@ -2,15 +2,11 @@ data "aws_region" "region" {
   name = var.region
 }
 
-data "aws_vpc" "vpc" {
-  id = var.vpc_id
-}
-
 locals {
   docker_environment = [
     {
       "name"  = "SERVICE_NAME"
-      "value" = "strongdm-${var.enable_sdm_gateway == "true" ? "gateway" : "relay"}"
+      "value" = "strongdm-gateway"
     },
     {
       "name"  = "SDM_ADMIN_TOKEN"
@@ -18,11 +14,15 @@ locals {
     },
     {
       "name"  = "ENABLE_SDM_GATEWAY"
-      "value" = var.enable_sdm_gateway
+      "value" = "true"
     },
     {
       "name"  = "SDM_GATEWAY_LISTEN_APP_PORT"
       "value" = var.sdm_gateway_listen_app_port
+    },
+    {
+      "name"  = "PUBLIC_HOST"
+      "value" = aws_lb.nlb.dns_name
     },
   ]
 }

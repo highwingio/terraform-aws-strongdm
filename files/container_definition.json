@@ -2,18 +2,9 @@
     {
         "name": "${service_identifier}-${task_identifier}",
         "image": "${image}",
-        "memory": ${memory},
-        "cpu": 0,
         "essential": true,
-        "memoryReservation": ${memory_reservation},
-        "portMappings": [
-        ],
         ${command_override}
         "environment": ${environment},
-        "mountPoints": ${mount_points},
-        "volumesFrom": [
-
-        ],
         "logConfiguration": {
             "logDriver": "awslogs",
             "options": {
