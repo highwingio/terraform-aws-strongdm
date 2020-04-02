@@ -2,6 +2,7 @@
 
 locals {
   docker_command_override = "${length(var.docker_command) > 0 ? "\"command\": [\"${var.docker_command}\"]," : ""}"
+  name_prefix             = "${var.service_identifier}-${var.task_identifier}"
 }
 
 data "template_file" "container_definition" {
@@ -11,32 +12,68 @@ data "template_file" "container_definition" {
     service_identifier    = var.service_identifier
     task_identifier       = var.task_identifier
     image                 = var.docker_image
-    memory                = var.docker_memory
-    memory_reservation    = var.docker_memory_reservation
     command_override      = local.docker_command_override
     environment           = jsonencode(local.docker_environment)
-    mount_points          = jsonencode(var.docker_mount_points)
     awslogs_region        = data.aws_region.region.name
-    awslogs_group         = "${var.service_identifier}-${var.task_identifier}"
+    awslogs_group         = local.name_prefix
     awslogs_stream_prefix = var.service_identifier
     app_port              = var.sdm_gateway_listen_app_port
   }
 }
 
-resource "aws_ecs_task_definition" "task" {
-  family                = "${var.service_identifier}-${var.task_identifier}"
-  container_definitions = data.template_file.container_definition.rendered
-  network_mode          = var.network_mode
-  task_role_arn         = aws_iam_role.task.arn
+resource "aws_lb" "nlb" {
+  name               = local.name_prefix
+  internal           = false
+  load_balancer_type = "network"
+  subnets            = var.public_subnet_ids
+}
 
-  volume {
-    name      = "data"
-    host_path = var.ecs_data_volume_path
+resource "aws_lb_listener" "frontend" {
+  load_balancer_arn = aws_lb.nlb.arn
+  port              = var.sdm_gateway_listen_app_port
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.gateway.arn
   }
 }
 
+resource "aws_lb_target_group" "gateway" {
+  name        = local.name_prefix
+  port        = var.sdm_gateway_listen_app_port
+  protocol    = "TCP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group" "inbound_nlb_traffic" {
+  name        = "sdm-inbound-nlb"
+  description = "Allow TCP inbound traffic from SDM NLB"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "TLS from VPC"
+    from_port   = var.sdm_gateway_listen_app_port
+    to_port     = var.sdm_gateway_listen_app_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_ecs_task_definition" "task" {
+  container_definitions    = data.template_file.container_definition.rendered
+  cpu                      = 256
+  execution_role_arn       = aws_iam_role.service.arn
+  family                   = local.name_prefix
+  memory                   = 512
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  task_role_arn            = aws_iam_role.task.arn
+}
+
 resource "aws_ecs_service" "service" {
-  name                               = "${var.service_identifier}-${var.task_identifier}-service"
+  name                               = "${local.name_prefix}-service"
   cluster                            = var.ecs_cluster_arn
   task_definition                    = aws_ecs_task_definition.task.arn
   desired_count                      = var.ecs_desired_count
@@ -44,30 +81,25 @@ resource "aws_ecs_service" "service" {
   deployment_minimum_healthy_percent = var.ecs_deployment_minimum_healthy_percent
   health_check_grace_period_seconds  = var.ecs_health_check_grace_period
 
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "host"
+  capacity_provider_strategy {
+    base              = 0
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 1
   }
 
-  ordered_placement_strategy {
-    type  = var.ecs_placement_strategy_type
-    field = var.ecs_placement_strategy_field
+  network_configuration {
+    subnets         = var.private_subnet_ids
+    security_groups = concat([aws_security_group.inbound_nlb_traffic.id], var.security_group_ids)
   }
 
-  depends_on = [aws_iam_role.service]
+  load_balancer {
+    target_group_arn = aws_lb_target_group.gateway.arn
+    container_name   = local.name_prefix
+    container_port   = var.sdm_gateway_listen_app_port
+  }
 }
 
 resource "aws_cloudwatch_log_group" "task" {
-  name              = "${var.service_identifier}-${var.task_identifier}"
+  name              = local.name_prefix
   retention_in_days = var.ecs_log_retention
-}
-
-resource "aws_security_group_rule" "gateway_inbound_traffic" {
-  count             = var.enable_sdm_gateway == "true" ? 1 : 0
-  from_port         = var.sdm_gateway_listen_app_port
-  protocol          = "tcp"
-  security_group_id = var.ecs_cluster_extra_access_sg_id
-  to_port           = var.sdm_gateway_listen_app_port
-  type              = "ingress"
-  cidr_blocks       = ["0.0.0.0/0"]
 }

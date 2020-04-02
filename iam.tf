@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "assume_role_service" {
 
     principals {
       type        = "Service"
-      identifiers = ["ecs.amazonaws.com"]
+      identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
 }
@@ -67,7 +67,7 @@ resource "aws_iam_role" "service" {
 
 resource "aws_iam_role_policy_attachment" "service" {
   role       = aws_iam_role.service.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy_attachment" "task_extra" {
@@ -75,4 +75,3 @@ resource "aws_iam_role_policy_attachment" "task_extra" {
   role       = aws_iam_role.task.name
   policy_arn = var.extra_task_policy_arns[count.index]
 }
-

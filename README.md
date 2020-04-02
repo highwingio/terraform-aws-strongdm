@@ -1,11 +1,7 @@
 # terraform-aws-strongdm
-Terraform Module for deploying [strongDM](https://www.strongdm.com) Relays on ECS Clusters
+Terraform module for deploying [strongDM](https://www.strongdm.com) gateways/relays on AWS ECS Fargate
 
 In order to use this module you will need to generate a SDM_ADMIN_TOKEN. Set up for admin tokens can be found [here](https://docs.strongdm.com/docs/guides/admin-tokens/).
-
-## Task Placement
-
-By default, this service first tries to spread strongDM relays across the ECS cluster by host; the module also allows you to specify a secondary placement strategy, which is set by default to binpack based on memory.
 
 ----------------------
 
@@ -43,16 +39,28 @@ Usage
 -----
 
 ```hcl
+data "aws_region" "current" {}
 
-module "ecs_strongdm" {
-  source             = "github.com/asicsdigital/terraform-aws-strongdm:v1.0.0"
-  region             = "${data.aws_region.current.name}"
-  vpc_id             = "${data.vpc.my_vpc.vpc_id}"
-  ecs_cluster_arn    = "${data.aws_ecs_cluster.my_cluster.arn}"
-  task_identifier    = "relay01"
-  sdm_admin_token    = "<SDM_ADMIN_TOKEN>"
+resource "aws_ecs_cluster" "strongdm" {
+  name               = "strongdm"
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+
+  default_capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 1
+  }
 }
 
+module "ecs_strongdm" {
+  source             = "github.com/highwingio/terraform-aws-strongdm:v1.0.0"
+  region             = data.aws_region.current.name
+  vpc_id             = data.vpc.my_vpc.vpc_id
+  ecs_cluster_arn    = aws_ecs_cluster.strongdm.arn
+  sdm_admin_token    = "<SDM_ADMIN_TOKEN>"
+  private_subnet_ids = <PRIVATE_SUBNETS>
+  public_subnet_ids  = <PUBLIC_SUBNETS>
+  security_group_ids = <SECURITY_GROUPS>
+}
 
 ```
 
@@ -68,9 +76,7 @@ FIXME add some outputs
 Authors
 =======
 
-* [Tim Hartmann](https://github.com/tfhartmann)
-
-Thank you to the StrongDM team for all the help!  https://github.com/strongdm
+Based off of https://github.com/asicsdigital/terraform-aws-strongdm
 
 Changelog
 =========
