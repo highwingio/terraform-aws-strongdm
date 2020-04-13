@@ -22,7 +22,7 @@ data "template_file" "container_definition" {
 }
 
 resource "aws_lb" "nlb" {
-  name_prefix        = local.name_prefix
+  name               = local.name_prefix
   internal           = false
   load_balancer_type = "network"
   subnets            = var.public_subnet_ids
@@ -40,7 +40,7 @@ resource "aws_lb_listener" "frontend" {
 }
 
 resource "aws_lb_target_group" "gateway" {
-  name_prefix = local.name_prefix
+  name        = local.name_prefix
   port        = var.sdm_gateway_listen_app_port
   protocol    = "TCP"
   target_type = "ip"
@@ -73,7 +73,7 @@ resource "aws_ecs_task_definition" "task" {
 }
 
 resource "aws_ecs_service" "service" {
-  name_prefix                        = "${local.name_prefix}-service"
+  name                               = local.name_prefix
   cluster                            = var.ecs_cluster_arn
   task_definition                    = aws_ecs_task_definition.task.arn
   desired_count                      = var.ecs_desired_count
@@ -100,6 +100,6 @@ resource "aws_ecs_service" "service" {
 }
 
 resource "aws_cloudwatch_log_group" "task" {
-  name_prefix       = local.name_prefix
+  name              = local.name_prefix
   retention_in_days = var.ecs_log_retention
 }
