@@ -62,12 +62,12 @@ variable "docker_command" {
 
 variable "service_identifier" {
   type        = string
-  description = "Unique identifier for this pganalyze service (used in log prefix, service name etc.)"
-  default     = "strongdm"
+  description = "Unique identifier for this service (used in log prefix, service name etc.)"
+  default     = "sdm"
 }
 
 variable "task_identifier" {
-  description = "Unique identifier for this pganalyze task (used in log prefix, service name etc.)"
+  description = "Unique identifier for this task (used in log prefix, service name etc.)"
   default     = "gateway"
 }
 

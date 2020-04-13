@@ -2,7 +2,8 @@
 
 locals {
   docker_command_override = "${length(var.docker_command) > 0 ? "\"command\": [\"${var.docker_command}\"]," : ""}"
-  name_prefix             = "${var.service_identifier}-${var.task_identifier}"
+  container_name          = "${var.service_identifier}-${var.task_identifier}"
+  name_prefix             = substr("${local.container_name}-${var.vpc_id}", 0, 32)
 }
 
 data "template_file" "container_definition" {
@@ -15,7 +16,7 @@ data "template_file" "container_definition" {
     command_override      = local.docker_command_override
     environment           = jsonencode(local.docker_environment)
     awslogs_region        = data.aws_region.region.name
-    awslogs_group         = local.name_prefix
+    awslogs_group         = aws_cloudwatch_log_group.task.name
     awslogs_stream_prefix = var.service_identifier
     app_port              = var.sdm_gateway_listen_app_port
   }
@@ -94,7 +95,7 @@ resource "aws_ecs_service" "service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.gateway.arn
-    container_name   = local.name_prefix
+    container_name   = local.container_name
     container_port   = var.sdm_gateway_listen_app_port
   }
 }
