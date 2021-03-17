@@ -84,8 +84,8 @@ variable "extra_task_policy_arns" {
 }
 
 variable "ecs_log_retention" {
-  description = "Number of days of ECS task logs to retain (default 3)"
-  default     = 3
+  description = "Number of days of ECS task logs to retain (default 365)"
+  default     = 365
 }
 
 variable "sdm_gateway_listen_app_port" {
