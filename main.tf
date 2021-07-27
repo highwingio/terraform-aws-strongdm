@@ -21,6 +21,10 @@ locals {
       "value" = var.sdm_gateway_listen_app_port
     },
     {
+      "name"  = "SDM_GATEWAY_PUBLIC_LISTEN_PORT"
+      "value" = var.sdm_gateway_public_listen_port
+    },
+    {
       "name"  = "PUBLIC_HOST"
       "value" = aws_lb.nlb.dns_name
     },
