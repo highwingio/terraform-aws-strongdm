@@ -31,13 +31,13 @@ resource "aws_security_group" "inbound_nlb_traffic" {
     description = "TLS from VPC"
     to_port     = var.sdm_gateway_listen_app_port
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS005
   }
 }
 
 resource "aws_lb" "nlb" {
   name               = local.name_prefix
-  internal           = false
+  internal           = false #tfsec:ignore:AWS005
   load_balancer_type = "network"
   subnets            = var.public_subnet_ids
   security_groups    = [aws_security_group.inbound_nlb_traffic.id]
