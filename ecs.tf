@@ -29,8 +29,7 @@ resource "aws_security_group" "inbound_nlb_traffic" {
 
   ingress {
     description = "TLS from VPC"
-    from_port   = var.sdm_gateway_public_listen_port
-    to_port     = var.sdm_gateway_public_listen_port
+    to_port     = var.sdm_gateway_listen_app_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
