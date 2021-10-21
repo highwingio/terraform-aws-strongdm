@@ -6,22 +6,6 @@ locals {
   name_prefix             = substr("${local.container_name}-${var.vpc_id}", 0, 32)
 }
 
-data "template_file" "container_definition" {
-  template = file("${path.module}/files/container_definition.json")
-
-  vars = {
-    service_identifier    = var.service_identifier
-    task_identifier       = var.task_identifier
-    image                 = var.docker_image
-    command_override      = local.docker_command_override
-    environment           = jsonencode(local.docker_environment)
-    awslogs_region        = data.aws_region.region.name
-    awslogs_group         = aws_cloudwatch_log_group.task.name
-    awslogs_stream_prefix = var.service_identifier
-    app_port              = var.sdm_gateway_listen_app_port
-  }
-}
-
 resource "aws_security_group" "inbound_nlb_traffic" {
   name_prefix = "sdm-inbound-nlb"
   description = "Allow TCP inbound traffic to SDM NLB"
