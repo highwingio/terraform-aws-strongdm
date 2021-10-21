@@ -84,6 +84,12 @@ resource "aws_ecs_task_definition" "task" {
       essential   = true
       command     = local.docker_command_override
       environment = local.docker_environment
+      secrets = [
+        {
+          name      = "SDM_ADMIN_TOKEN",
+          valueFrom = var.sdm_admin_token_parameter_arn
+        }
+      ]
       logConfiguration = {
         logDriver = "awslogs"
         options = {

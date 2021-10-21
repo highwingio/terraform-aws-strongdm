@@ -15,9 +15,9 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "sdm_admin_token" {
+variable "sdm_admin_token_parameter_arn" {
   type        = string
-  description = "SDM_ADMIN_TOKEN: admin tokens to provide tokenized account access for fully automated strongDM use."
+  description = "ARN of an SSM parameter holding a tokens to provide account access for fully automated strongDM use."
 }
 
 variable "vpc_id" {
