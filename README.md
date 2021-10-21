@@ -65,8 +65,13 @@ module "ecs_strongdm" {
 ```
 
 #### Docker Image
+The Docker image is stored in AWS ECR. To create/push a new version of it, follow these steps:
 
-This module defaults to use the `asicsdigital/strongdm:latest` Docker image. This Image is built from the Dockerfile in this repo, using the command script in `files/entrypoint.sh` It should work with no changes needed, but should you wish to use the upstream `quay.io/sdmrepo/relay` image, or a custom image, you can pass in the image name to the `docker_image` prameter.
+1. Log in to Docker using the ECR helper: `aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/highwing` (you'll need to be in the global account)
+2. Build the image locally: `docker build -t strongdm:latest .`
+3. Tag the local image: `docker tag strongdm:latest public.ecr.aws/highwing/strongdm:latest`
+3. Push the new tag to the ECR repository: `docker push public.ecr.aws/highwing/strongdm:latest`
+
 
 Outputs
 =======
