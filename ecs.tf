@@ -22,11 +22,25 @@ data "template_file" "container_definition" {
   }
 }
 
+resource "aws_security_group" "inbound_nlb_traffic" {
+  name_prefix = "sdm-inbound-nlb"
+  description = "Allow TCP inbound traffic to SDM NLB"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description = "TLS from VPC"
+    to_port     = var.sdm_gateway_listen_app_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS005
+  }
+}
+
 resource "aws_lb" "nlb" {
   name               = local.name_prefix
-  internal           = false
+  internal           = false #tfsec:ignore:AWS005
   load_balancer_type = "network"
   subnets            = var.public_subnet_ids
+  security_groups    = [aws_security_group.inbound_nlb_traffic.id]
 }
 
 resource "aws_lb_listener" "frontend" {
@@ -48,9 +62,9 @@ resource "aws_lb_target_group" "gateway" {
   vpc_id      = var.vpc_id
 }
 
-resource "aws_security_group" "inbound_nlb_traffic" {
-  name_prefix = "sdm-inbound-nlb"
-  description = "Allow TCP inbound traffic from SDM NLB"
+resource "aws_security_group" "nlb_listener_traffic" {
+  name_prefix = "sdm-nlb_listener-nlb"
+  description = "Allow TCP traffic from NLB listener to SDM Gateway"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -58,7 +72,7 @@ resource "aws_security_group" "inbound_nlb_traffic" {
     from_port   = var.sdm_gateway_listen_app_port
     to_port     = var.sdm_gateway_listen_app_port
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    self        = true
   }
 }
 
@@ -90,7 +104,7 @@ resource "aws_ecs_service" "service" {
 
   network_configuration {
     subnets         = var.private_subnet_ids
-    security_groups = concat([aws_security_group.inbound_nlb_traffic.id], var.security_group_ids)
+    security_groups = concat([aws_security_group.nlb_listener_traffic.id], var.security_group_ids)
   }
 
   load_balancer {

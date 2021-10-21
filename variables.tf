@@ -91,10 +91,11 @@ variable "ecs_log_retention" {
 variable "sdm_gateway_listen_app_port" {
   type        = string
   description = "Port for SDM gateway to listen on inside container"
-  default     = "5000"
+  default     = "443"
 }
 
 variable "security_group_ids" {
-  type    = list(string)
-  default = []
+  type        = list(string)
+  description = "Additional security groups for the SDM gateway (e.g. to access data sources)"
+  default     = []
 }
