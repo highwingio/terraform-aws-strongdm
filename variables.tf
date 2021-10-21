@@ -1,7 +1,7 @@
 variable "docker_image" {
   type        = string
-  description = "Docker image to use (default: highwing/strongdm:latest )"
-  default     = "highwing/strongdm:latest"
+  description = "Docker image to use"
+  default     = "public.ecr.aws/highwing/strongdm:latest"
 }
 
 variable "ecs_cluster_arn" {
