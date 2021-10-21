@@ -1,0 +1,17 @@
+name: Checks
+on:
+  - push
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      AWS_DEFAULT_REGION: us-east-1
+    steps:
+      - uses: actions/checkout@master
+      - uses: hashicorp/setup-terraform@v1
+      - id: Init
+        run: terraform init -no-color
+      - id: Fmt
+        run: terraform fmt -check -recursive -no-color
+      - id: Validate
+        run: terraform validate -no-color

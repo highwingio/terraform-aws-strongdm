@@ -56,7 +56,7 @@ module "ecs_strongdm" {
   region             = data.aws_region.current.name
   vpc_id             = data.vpc.my_vpc.vpc_id
   ecs_cluster_arn    = aws_ecs_cluster.strongdm.arn
-  sdm_admin_token    = "<SDM_ADMIN_TOKEN>"
+  sdm_admin_token_parameter_arn    = "arn::aws::ssm:<SDM_ADMIN_TOKEN>"
   private_subnet_ids = <PRIVATE_SUBNETS>
   public_subnet_ids  = <PUBLIC_SUBNETS>
   security_group_ids = <SECURITY_GROUPS>
@@ -72,11 +72,6 @@ The Docker image is stored in AWS ECR. To create/push a new version of it, follo
 3. Tag the local image: `docker tag strongdm:latest public.ecr.aws/highwing/strongdm:latest`
 3. Push the new tag to the ECR repository: `docker push public.ecr.aws/highwing/strongdm:latest`
 
-
-Outputs
-=======
-
-FIXME add some outputs
 
 Authors
 =======
