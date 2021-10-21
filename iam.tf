@@ -1,3 +1,37 @@
+data "aws_iam_policy_document" "task_policy" {
+  statement {
+    actions = [
+      "ec2:Describe*",
+      "autoscaling:Describe*",
+      "ec2:DescribeAddresses",
+      "ec2:DescribeInstances",
+      "ec2:DescribeTags",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "cloudwatch:GetMetricStatistics",
+      "logs:DescribeLogStreams",
+      "logs:GetLogEvents",
+      "logs:PutLogEvents",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "service_policy" {
+  statement {
+    actions   = ["ssm:GetParameters"]
+    resources = [var.sdm_admin_token_parameter_arn]
+  }
+}
+
 data "aws_iam_policy_document" "assume_role_task" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -35,6 +69,12 @@ resource "aws_iam_role" "service" {
 resource "aws_iam_role_policy_attachment" "service" {
   role       = aws_iam_role.service.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy" "service" {
+  name_prefix = "${var.service_identifier}-${var.task_identifier}-ecsServicePolicy"
+  role        = aws_iam_role.service.id
+  policy      = data.aws_iam_policy_document.service_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "task_extra" {

@@ -9,10 +9,6 @@ locals {
       "value" = "strongdm-gateway"
     },
     {
-      "name"  = "SDM_ADMIN_TOKEN"
-      "value" = var.sdm_admin_token
-    },
-    {
       "name"  = "ENABLE_SDM_GATEWAY"
       "value" = "true"
     },

@@ -1,7 +1,7 @@
 # ECS SERVICE
 
 locals {
-  docker_command_override = length(var.docker_command) > 0 ? "\"command\": [\"${var.docker_command}\"]," : ""
+  docker_command_override = length(var.docker_command) > 0 ? { command = [var.docker_command] } : null
   container_name          = "${var.service_identifier}-${var.task_identifier}"
   name_prefix             = substr("${local.container_name}-${var.vpc_id}", 0, 32)
 }
@@ -77,7 +77,36 @@ resource "aws_security_group" "nlb_listener_traffic" {
 }
 
 resource "aws_ecs_task_definition" "task" {
-  container_definitions    = data.template_file.container_definition.rendered
+  container_definitions = jsonencode([
+    {
+      name        = "${var.service_identifier}-${var.task_identifier}"
+      image       = var.docker_image
+      essential   = true
+      command     = local.docker_command_override
+      environment = local.docker_environment
+      secrets = [
+        {
+          name      = "SDM_ADMIN_TOKEN",
+          valueFrom = var.sdm_admin_token_parameter_arn
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.task.name,
+          "awslogs-region"        = data.aws_region.region.name,
+          "awslogs-stream-prefix" = var.service_identifier
+        }
+      }
+      portMappings = [
+        {
+          containerPort = var.sdm_gateway_listen_app_port,
+          hostPort      = var.sdm_gateway_listen_app_port,
+          protocol      = "tcp"
+        }
+      ]
+    }
+  ])
   cpu                      = 256
   execution_role_arn       = aws_iam_role.service.arn
   family                   = local.name_prefix
