@@ -84,14 +84,15 @@ variable "extra_task_policy_arns" {
 }
 
 variable "ecs_log_retention" {
+  type        = number
   description = "Number of days of ECS task logs to retain (default 365)"
   default     = 365
 }
 
 variable "sdm_gateway_listen_app_port" {
-  type        = string
+  type        = number
   description = "Port for SDM gateway to listen on inside container"
-  default     = "443"
+  default     = 443
 }
 
 variable "security_group_ids" {
