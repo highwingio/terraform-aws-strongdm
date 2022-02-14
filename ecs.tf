@@ -6,26 +6,11 @@ locals {
   name_prefix             = substr("${local.container_name}-${var.vpc_id}", 0, 32)
 }
 
-resource "aws_security_group" "inbound_nlb_traffic" {
-  name_prefix = "sdm-inbound-nlb"
-  description = "Allow TCP inbound traffic to SDM NLB"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    description = "TLS from VPC"
-    from_port   = var.sdm_gateway_listen_app_port
-    to_port     = var.sdm_gateway_listen_app_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #tfsec:ignore:AWS005
-  }
-}
-
 resource "aws_lb" "nlb" {
   name               = local.name_prefix
   internal           = false #tfsec:ignore:AWS005
-  load_balancer_type = "application"
+  load_balancer_type = "network"
   subnets            = var.public_subnet_ids
-  security_groups    = [aws_security_group.inbound_nlb_traffic.id]
 }
 
 resource "aws_lb_listener" "frontend" {
@@ -57,7 +42,8 @@ resource "aws_security_group" "nlb_listener_traffic" {
     from_port   = var.sdm_gateway_listen_app_port
     to_port     = var.sdm_gateway_listen_app_port
     protocol    = "tcp"
-    self        = true
+    # This stays open because NLBs exist outside of security groups
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
