@@ -23,7 +23,7 @@ resource "aws_security_group" "inbound_nlb_traffic" {
 resource "aws_lb" "nlb" {
   name               = local.name_prefix
   internal           = false #tfsec:ignore:AWS005
-  load_balancer_type = "network"
+  load_balancer_type = "application"
   subnets            = var.public_subnet_ids
   security_groups    = [aws_security_group.inbound_nlb_traffic.id]
 }
