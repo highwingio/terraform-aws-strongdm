@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "task_policy" {
 data "aws_iam_policy_document" "service_policy" {
   statement {
     actions   = ["ssm:GetParameters"]
-    resources = [var.sdm_admin_token_parameter_arn]
+    resources = [aws_ssm_parameter.gateway_token.arn]
   }
 }
 
