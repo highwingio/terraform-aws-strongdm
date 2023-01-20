@@ -1,9 +1,3 @@
-variable "docker_image" {
-  type        = string
-  description = "Docker image to use"
-  default     = "public.ecr.aws/highwing/strongdm:latest"
-}
-
 variable "ecs_cluster_arn" {
   type        = string
   description = "ARN of ECS cluster in which the service will be deployed"
@@ -15,9 +9,9 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "sdm_admin_token_parameter_arn" {
+variable "sdm_relay_token_parameter_arn" {
   type        = string
-  description = "ARN of an SSM parameter holding a tokens to provide account access for fully automated strongDM use."
+  description = "ARN of an SSM parameter holding an SDM relay token"
 }
 
 variable "vpc_id" {
@@ -55,11 +49,6 @@ variable "ecs_health_check_grace_period" {
   description = "Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 1800. (default 0)"
 }
 
-variable "docker_command" {
-  description = "String to override CMD in Docker container (default \"\")"
-  default     = ""
-}
-
 variable "service_identifier" {
   type        = string
   description = "Unique identifier for this service (used in log prefix, service name etc.)"
@@ -78,7 +67,7 @@ variable "log_group_name" {
 }
 
 variable "extra_task_policy_arns" {
-  type        = list
+  type        = list(any)
   description = "List of ARNs of IAM policies to be attached to the ECS task role (in addition to the default policy, so cannot be more than 9 ARNs)"
   default     = []
 }
@@ -89,10 +78,10 @@ variable "ecs_log_retention" {
   default     = 365
 }
 
-variable "sdm_gateway_listen_app_port" {
+variable "gateway_listen_port" {
   type        = number
-  description = "Port for SDM gateway to listen on inside container"
-  default     = 443
+  description = "Port for SDM gateway to listen on"
+  default     = 5000
 }
 
 variable "security_group_ids" {

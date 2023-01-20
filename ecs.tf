@@ -1,9 +1,8 @@
 # ECS SERVICE
 
 locals {
-  docker_command_override = length(var.docker_command) > 0 ? { command = [var.docker_command] } : null
-  container_name          = "${var.service_identifier}-${var.task_identifier}"
-  name_prefix             = substr("${local.container_name}-${var.vpc_id}", 0, 32)
+  container_name = "${var.service_identifier}-${var.task_identifier}"
+  name_prefix    = substr("${local.container_name}-${var.vpc_id}", 0, 32)
 }
 
 resource "aws_lb" "nlb" {
@@ -15,7 +14,7 @@ resource "aws_lb" "nlb" {
 
 resource "aws_lb_listener" "frontend" {
   load_balancer_arn = aws_lb.nlb.arn
-  port              = var.sdm_gateway_listen_app_port
+  port              = var.gateway_listen_port
   protocol          = "TCP"
 
   default_action {
@@ -26,7 +25,7 @@ resource "aws_lb_listener" "frontend" {
 
 resource "aws_lb_target_group" "gateway" {
   name        = local.name_prefix
-  port        = var.sdm_gateway_listen_app_port
+  port        = var.gateway_listen_port
   protocol    = "TCP"
   target_type = "ip"
   vpc_id      = var.vpc_id
@@ -39,8 +38,8 @@ resource "aws_security_group" "nlb_listener_traffic" {
 
   ingress {
     description = "TLS from VPC"
-    from_port   = var.sdm_gateway_listen_app_port
-    to_port     = var.sdm_gateway_listen_app_port
+    from_port   = var.gateway_listen_port
+    to_port     = var.gateway_listen_port
     protocol    = "tcp"
     # This stays open because NLBs exist outside of security groups
     cidr_blocks = ["0.0.0.0/0"]
@@ -51,14 +50,13 @@ resource "aws_ecs_task_definition" "task" {
   container_definitions = jsonencode([
     {
       name        = "${var.service_identifier}-${var.task_identifier}"
-      image       = var.docker_image
+      image       = "quay.io/sdmrepo/relay"
       essential   = true
-      command     = local.docker_command_override
       environment = local.docker_environment
       secrets = [
         {
-          name      = "SDM_ADMIN_TOKEN",
-          valueFrom = var.sdm_admin_token_parameter_arn
+          name      = "SDM_RELAY_TOKEN",
+          valueFrom = aws_ssm_parameter.gateway_token.arn
         }
       ]
       logConfiguration = {
@@ -71,8 +69,8 @@ resource "aws_ecs_task_definition" "task" {
       }
       portMappings = [
         {
-          containerPort = var.sdm_gateway_listen_app_port,
-          hostPort      = var.sdm_gateway_listen_app_port,
+          containerPort = var.gateway_listen_port,
+          hostPort      = var.gateway_listen_port,
           protocol      = "tcp"
         }
       ]
@@ -81,7 +79,7 @@ resource "aws_ecs_task_definition" "task" {
   cpu                      = 256
   execution_role_arn       = aws_iam_role.service.arn
   family                   = local.name_prefix
-  memory                   = 512
+  memory                   = 1024
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   task_role_arn            = aws_iam_role.task.arn
@@ -110,7 +108,7 @@ resource "aws_ecs_service" "service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.gateway.arn
     container_name   = local.container_name
-    container_port   = var.sdm_gateway_listen_app_port
+    container_port   = var.gateway_listen_port
   }
 }
 
