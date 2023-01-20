@@ -1,39 +1,7 @@
 # terraform-aws-strongdm
 Terraform module for deploying [strongDM](https://www.strongdm.com) gateways/relays on AWS ECS Fargate
 
-In order to use this module you will need to generate a SDM_ADMIN_TOKEN. Set up for admin tokens can be found [here](https://docs.strongdm.com/docs/guides/admin-tokens/).
-
 ----------------------
-
-#### Required
-- `region` - AWS region in which the EC2 Container Service cluster is located
-- `ecs_cluster` - EC2 Container Service cluster in which the service will be deployed (must already exist, the module will not create it).
-- `vpc_id` - ID of VPC in which ECS cluster is located
-- `ecs_cluster_arn` - ARN of ECS cluster in which the service will be deployed
-- `sdm_admin_token` - SDM_ADMIN_TOKEN: admin tokens to provide tokenized account access for fully automated strongDM use.
-
-#### Optional
-
-- `service_identifier` - Unique identifier for the service, used in naming resources (default: `strongdm`).
-- `task_identifier` - Unique identifier for the task, used in naming resources (default: `relay`).
-- `docker_image` - Docker image specification (default: asicsdigital/strongdm:latest ).
-- `ecs_desired_count` - Desired number of containers in the task (default 2)
-- `docker_command` - String to override CMD in Docker container (default "")
-- `docker_memory` - Hard limit on memory use for task container (default 256)
-- `docker_memory_reservation` - Soft limit on memory use for task container (default 128)
-- `docker_port_mappings` - List of port mapping maps of format `{ "containerPort" = integer, [ "hostPort" = integer, "protocol" = "tcp or udp" ] }` (default [])
-- `docker_mount_points` -  List of mount point maps of format `{ "sourceVolume" = "vol_name", "containerPath" = "path", ["readOnly" = "true or false" ] }` (default [])
-- `ecs_data_volume_path` - Path to volume on ECS node to be defined as a "data" volume (default "/opt/data")"
-- `docker_environment` - List of environment maps of format `{ "name" = "var_name", "value" = "var_value" }` (default [])
-- `network_mode` - Docker network mode for task (default "bridge")
-- `log_group_name` - Name for CloudWatch Log Group that will receive collector logs (must be unique, default is created from service_identifier and task_identifier)
-- `extra_task_policy_arns` - List of ARNs of IAM policies to be attached to the ECS task role (in addition to the default policy, so cannot be more than 9 ARNs)
-- `ecs_deployment_maximum_percent` - Upper limit in percentage of tasks that can be running during a deployment (default 200)
-- `ecs_deployment_minimum_healthy_percent` - Lower limit in percentage of tasks that must remain healthy during a deployment (default 100)
-- `ecs_health_check_grace_period` - Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 1800. (default 0)
-- `ecs_placement_strategy_type` - Placement strategy to use when distributing tasks (default binpack)
-- `ecs_placement_strategy_field` - Container metadata field to use when distributing tasks (default memory)
-- `ecs_log_retention` - Number of days of ECS task logs to retain (default 3)
 
 Usage
 -----
@@ -64,14 +32,72 @@ module "ecs_strongdm" {
 
 ```
 
-#### Docker Image
-The Docker image is stored in AWS ECR. To create/push a new version of it, follow these steps:
+<!-- BEGIN_TF_DOCS -->
+## Requirements
 
-1. Log in to Docker using the ECR helper: `aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/highwing` (you'll need to be in the global account)
-2. Build the image locally: `docker build -t strongdm:latest .`
-3. Tag the local image: `docker tag strongdm:latest public.ecr.aws/highwing/strongdm:latest`
-3. Push the new tag to the ECR repository: `docker push public.ecr.aws/highwing/strongdm:latest`
+No requirements.
 
+## Providers
+
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.51.0 |
+| <a name="provider_sdm"></a> [sdm](#provider\_sdm) | 3.5.4 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_cloudwatch_log_group.task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_ecs_service.service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
+| [aws_ecs_task_definition.task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
+| [aws_iam_role.service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role.task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
+| [aws_iam_role_policy_attachment.service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_iam_role_policy_attachment.task_extra](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [aws_lb.nlb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
+| [aws_lb_listener.frontend](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_target_group.gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
+| [aws_security_group.nlb_listener_traffic](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_ssm_parameter.gateway_token](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [sdm_node.gateway](https://registry.terraform.io/providers/strongdm/sdm/latest/docs/resources/node) | resource |
+| [aws_iam_policy_document.assume_role_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.assume_role_task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.service_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.task_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_region.region](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_ecs_cluster_arn"></a> [ecs\_cluster\_arn](#input\_ecs\_cluster\_arn) | ARN of ECS cluster in which the service will be deployed | `string` | n/a | yes |
+| <a name="input_ecs_deployment_maximum_percent"></a> [ecs\_deployment\_maximum\_percent](#input\_ecs\_deployment\_maximum\_percent) | Upper limit in percentage of tasks that can be running during a deployment (default 200) | `string` | `"200"` | no |
+| <a name="input_ecs_deployment_minimum_healthy_percent"></a> [ecs\_deployment\_minimum\_healthy\_percent](#input\_ecs\_deployment\_minimum\_healthy\_percent) | Lower limit in percentage of tasks that must remain healthy during a deployment (default 100) | `string` | `"100"` | no |
+| <a name="input_ecs_desired_count"></a> [ecs\_desired\_count](#input\_ecs\_desired\_count) | Desired number of containers in the task (default 1) | `number` | `1` | no |
+| <a name="input_ecs_health_check_grace_period"></a> [ecs\_health\_check\_grace\_period](#input\_ecs\_health\_check\_grace\_period) | Seconds to ignore failing load balancer health checks on newly instantiated tasks to prevent premature shutdown, up to 1800. (default 0) | `string` | `"0"` | no |
+| <a name="input_ecs_log_retention"></a> [ecs\_log\_retention](#input\_ecs\_log\_retention) | Number of days of ECS task logs to retain (default 365) | `number` | `365` | no |
+| <a name="input_extra_task_policy_arns"></a> [extra\_task\_policy\_arns](#input\_extra\_task\_policy\_arns) | List of ARNs of IAM policies to be attached to the ECS task role (in addition to the default policy, so cannot be more than 9 ARNs) | `list(any)` | `[]` | no |
+| <a name="input_gateway_listen_port"></a> [gateway\_listen\_port](#input\_gateway\_listen\_port) | Port for SDM gateway to listen on | `number` | `5000` | no |
+| <a name="input_log_group_name"></a> [log\_group\_name](#input\_log\_group\_name) | Name for CloudWatch Log Group that will receive collector logs (must be unique, default is created from service\_identifier and task\_identifier) | `string` | `""` | no |
+| <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of private subnet IDs in which to place the ECS tasks | `list(string)` | n/a | yes |
+| <a name="input_public_subnet_ids"></a> [public\_subnet\_ids](#input\_public\_subnet\_ids) | List of public subnet IDs in which to place the load balancer | `list(string)` | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | AWS region in which ECS cluster is located (default is 'us-east-1') | `string` | `"us-east-1"` | no |
+| <a name="input_sdm_relay_token_parameter_arn"></a> [sdm\_relay\_token\_parameter\_arn](#input\_sdm\_relay\_token\_parameter\_arn) | ARN of an SSM parameter holding an SDM relay token | `string` | n/a | yes |
+| <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Additional security groups for the SDM gateway (e.g. to access data sources) | `list(string)` | `[]` | no |
+| <a name="input_service_identifier"></a> [service\_identifier](#input\_service\_identifier) | Unique identifier for this service (used in log prefix, service name etc.) | `string` | `"sdm"` | no |
+| <a name="input_task_identifier"></a> [task\_identifier](#input\_task\_identifier) | Unique identifier for this task (used in log prefix, service name etc.) | `string` | `"gateway"` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | ID of VPC in which ECS cluster is located | `string` | n/a | yes |
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->
 
 Authors
 =======
