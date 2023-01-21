@@ -9,11 +9,6 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "sdm_relay_token_parameter_arn" {
-  type        = string
-  description = "ARN of an SSM parameter holding an SDM relay token"
-}
-
 variable "vpc_id" {
   type        = string
   description = "ID of VPC in which ECS cluster is located"
