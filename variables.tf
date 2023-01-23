@@ -14,14 +14,9 @@ variable "vpc_id" {
   description = "ID of VPC in which ECS cluster is located"
 }
 
-variable "private_subnet_ids" {
-  type        = list(string)
-  description = "List of private subnet IDs in which to place the ECS tasks"
-}
-
 variable "public_subnet_ids" {
   type        = list(string)
-  description = "List of public subnet IDs in which to place the load balancer"
+  description = "List of public subnet IDs in which to place the load balancer and tasks"
 }
 
 variable "ecs_desired_count" {

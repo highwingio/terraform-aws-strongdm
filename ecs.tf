@@ -101,7 +101,7 @@ resource "aws_ecs_service" "service" {
   }
 
   network_configuration {
-    subnets         = var.private_subnet_ids
+    subnets         = var.public_subnet_ids
     security_groups = concat([aws_security_group.nlb_listener_traffic.id], var.security_group_ids)
   }
 
