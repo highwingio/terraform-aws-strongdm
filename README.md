@@ -85,8 +85,10 @@ No modules.
 | <a name="input_extra_task_policy_arns"></a> [extra\_task\_policy\_arns](#input\_extra\_task\_policy\_arns) | List of ARNs of IAM policies to be attached to the ECS task role (in addition to the default policy, so cannot be more than 9 ARNs) | `list(any)` | `[]` | no |
 | <a name="input_gateway_listen_port"></a> [gateway\_listen\_port](#input\_gateway\_listen\_port) | Port for SDM gateway to listen on | `number` | `5000` | no |
 | <a name="input_log_group_name"></a> [log\_group\_name](#input\_log\_group\_name) | Name for CloudWatch Log Group that will receive collector logs (must be unique, default is created from service\_identifier and task\_identifier) | `string` | `""` | no |
-| <a name="input_public_subnet_ids"></a> [public\_subnet\_ids](#input\_public\_subnet\_ids) | List of public subnet IDs in which to place the load balancer and tasks | `list(string)` | n/a | yes |
+| <a name="input_private_subnet_ids"></a> [private\_subnet\_ids](#input\_private\_subnet\_ids) | List of private subnet IDs in which to place the ECS tasks | `list(string)` | n/a | yes |
+| <a name="input_public_subnet_ids"></a> [public\_subnet\_ids](#input\_public\_subnet\_ids) | List of public subnet IDs in which to place the load balancer | `list(string)` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region in which ECS cluster is located (default is 'us-east-1') | `string` | `"us-east-1"` | no |
+| <a name="input_sdm_relay_token_parameter_arn"></a> [sdm\_relay\_token\_parameter\_arn](#input\_sdm\_relay\_token\_parameter\_arn) | ARN of an SSM parameter holding an SDM relay token | `string` | n/a | yes |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Additional security groups for the SDM gateway (e.g. to access data sources) | `list(string)` | `[]` | no |
 | <a name="input_service_identifier"></a> [service\_identifier](#input\_service\_identifier) | Unique identifier for this service (used in log prefix, service name etc.) | `string` | `"sdm"` | no |
 | <a name="input_task_identifier"></a> [task\_identifier](#input\_task\_identifier) | Unique identifier for this task (used in log prefix, service name etc.) | `string` | `"gateway"` | no |
